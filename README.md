@@ -1,87 +1,43 @@
-## **1. Laboratory.csv (총 55 개 컬럼)**
+# 페니실린 발효 데이터 기반 머신러닝 프로젝트 아이디어
 
-|**구분**|**컬럼**|**의미**|
-|---|---|---|
-|**계보 정보**|batch|최종 제품 배치 번호(인덱스)|
-||code|제품 하위군(sub-family)을 구분하는 제품 코드|
-||strength|정제 1 개당 API 함량 (mg)|
-||size|목표 생산 정제 수(배치 크기)|
-||start|생산 시작 시각(YYYY-MM-DD hh:mm)|
-|**API/부형제 계열**|api_code, api_batch|API 자재 코드·배치 번호|
-||smcc_batch, lactose_batch, starch_batch|실리카화 MCC, 락토스, 전분 배치 번호|
-|**API 품질**|api_water|API 수분 함량(%)|
-||api_total_impurities, api_l_impurity|총 불순물·L-불순물 함량(%)|
-||api_content|순 API 함량(%)|
-||api_ps01, api_ps05, api_ps09|입도 10 %·50 %·90 %(µm)|
-|**락토스 품질**|lactose_water|수분(%)|
-||lactose_sieve0045, …015, …025|체별 잔류율(%)|
-|**SMCC 품질**|smcc_water|수분(%)|
-||smcc_td, smcc_bd|탭 밀도·벌크 밀도(g/ml)|
-||smcc_ps01, smcc_ps05, smcc_ps09|입도 10 / 50 / 90 %(µm)|
-|**전분 품질**|starch_ph|pH|
-||starch_water|수분(%)|
-|**중간제품(정제심) 품질**|tbl_min_thickness, tbl_max_thickness|정제심 최소·최대 두께(mm)|
-||tbl_min_weight, tbl_max_weight|정제심 최소·최대 중량(mg)|
-||tbl_rsd_weight|정제심 중량 RSD(%)|
-||tbl_min_hardness, tbl_max_hardness, tbl_av_hardness|정제심 경도 최소·최대·평균(N)|
-|**코팅 후 품질**|fct_min_thickness, fct_max_thickness|코팅정 최소·최대 두께(mm)|
-||fct_rsd_weight|코팅정 중량 RSD(%)|
-||fct_min_hardness, fct_max_hardness, fct_av_hardness|코팅정 경도 최소·최대·평균(N)|
-|**가공 지표**|tbl_tensile, fct_tensile|정제심·코팅정 인장강도(정규화 경도)|
-||tbl_yield, batch_yield|압축 공정·전체 배치 수율(%)|
-|**최종제품 품질**|dissolution_av, dissolution_min|30 분 약물 방출 평균·최소값(%)|
-||residual_solvent|잔류 용매(%)|
-||impurities_total, impurity_o, impurity_l|총 불순물, O / L 불순물(%)|
+이 데이터는 제약 공정 데이터를 다루는 머신러닝 프로젝트에 아주 좋은 예시입니다. 데이터의 특성을 활용하여 다음과 같은 흥미로운 머신러닝 모델을 만들어 볼 수 있습니다.
 
----
+### 1. 페니실린 농도 단기 예측 모델 (회귀 문제)
 
-## **2. Process Time-series 파일(예: 1.csv)**
+*   **문제 정의**: 현재 공정 상태를 바탕으로 다음 시점(0.2시간 후)의 페니실린 농도(`Penicillin concentration`)를 실시간 예측합니다.
+*   **머신러닝 유형**: 회귀 (Regression)
+*   **주요 특성 (입력 변수)**:
+    *   현재 시점의 공정 변수들: `Aeration rate`, `Agitator RPM`, `Sugar feed rate`, `Acid flow rate`, `Base flow rate`, `Dissolved oxygen concentration`, `pH`, `Temperature`, `Substrate concentration` (총 9개 변수)
+*   **목표 변수 (예측 대상)**: 다음 시점(0.2시간 후)의 `Penicillin concentration(P:g/L)`.
+*   **구현 방법**:
+    *   **LightGBM 회귀 모델**을 사용하여 높은 성능 달성 (R² = 0.9710, MAE = 1.1080)
+    *   전체 데이터의 20%를 샘플링하여 학습 속도 최적화
+    *   특성 중요도 분석을 통해 `Time`이 가장 중요한 변수임을 확인
+*   **데이터 특성**:
+    *   100개 배치에서 총 22,687개의 데이터 포인트 생성
+    *   각 배치는 고유한 발효 패턴을 보임
+*   **기대 효과**: 실시간 공정 모니터링을 통해 단기적인 페니실린 농도 변화를 예측하여 즉각적인 공정 조정 및 최적화가 가능합니다.
 
-|**컬럼**|**의미**|**주요 단위**|
-|---|---|---|
-|timestamp|10 초 간격 타임스탬프(인덱스)|–|
-|campaign|동일 설비 주기 내 배치 묶음 번호|–|
-|batch, code|최종제품 배치·제품 코드|–|
-|tbl_speed|타정기 프레스 속도(정제/h)|tablets/hour|
-|fom|충전 장치 회전 속도|rpm|
-|main_comp|메인 압축력 평균|kN|
-|tbl_fill|충전 깊이(정제심 체적)|mm|
-|SREL|메인 압축력 상대표준편차|%|
-|pre_comp|프리-압축력 평균|kN|
-|produced|누적 양품 정제수|tablets|
-|waste|누적 불량 정제수|tablets|
-|cyl_main, cyl_pre|메인·프리 실린드리컬 높이|mm|
-|stiffness|하부 펀치 강성|N|
-|ejection|정제 배출력 최대값|N|
 
----
+---------------(예정)---------------------
 
-## **3. Process.csv (배치당 파생 특성)**
 
-|**컬럼**|**의미**||
-|---|---|---|
-|tbl_speed_mean|0 값 제외 평균 프레스 속도||
-|tbl_speed_change|속도 변동 횟수(배치 크기로 정규화)||
-|tbl_speed_0_duration|속도 0 인 누적 시간(정규화, 주말 제외)||
-|total_waste, startup_waste|배치 전체·시동 구간 불량 수(정규화)||
-|weekend|주말 생산 여부(Yes/No)||
-|fom_mean, fom_change|충전 속도 평균·변동 횟수||
-|SREL_startup_mean, SREL_production_mean, SREL_production_max|SREL 시동 평균, 생산 평균·최대||
-|main_CompForce_mean, …_sd, …_median|메인 압축력 평균·표준편차·중앙값||
-|pre_CompForce_mean|프리 압축력 평균||
-|tbl_fill_mean, tbl_fill_sd|충전 깊이 평균·표준편차||
-|cyl_height_mean|실린더 높이 평균||
-|stiffness_mean/max/min|하부 펀치 강성 평균·최대·최소||
-|ejection_mean/max/min|배출력 평균·최대·최소||
-|Startup_tbl_fill_maxDifference|시동 구간 충전 깊이 최대-최소 차||
-|Startup_main_CompForce_mean, Startup_tbl_fill_mean|시동 구간 메인 압축력·충전 깊이 평균||
+### 2. 공정 이상 탐지 모델 (분류 또는 이상치 탐지 문제)
 
----
+*   **문제 정의**: 실시간으로 공정 데이터를 모니터링하여, 공정이 정상 범주를 벗어나는 이상 징후(`Fault flag`)를 조기에 감지합니다.
+*   **머신러닝 유형**: 이진 분류 (Binary Classification) 또는 이상치 탐지 (Anomaly Detection)
+*   **주요 특성 (입력 변수)**: `Time`에 따른 모든 센서 데이터 (`Aeration rate`, `RPM`, `pH`, `Temperature`, `DO2` 등).
+*   **목표 변수 (예측 대상)**: `Fault flag` (0: 정상, 1: 이상).
+*   **구현 방법**:
+    *   **지도학습**: `Fault flag`를 레이블로 사용하여 LSTM, Transformer 기반의 분류 모델을 학습시킵니다.
+    *   **비지도학습**: 정상 데이터만으로 Autoencoder와 같은 딥러닝 모델을 학습시킨 후, 복원 오차(reconstruction error)가 큰 데이터를 이상치로 탐지할 수 있습니다. 이는 라벨링된 이상 데이터가 적을 때 유용합니다.
+*   **기대 효과**: 설비 고장이나 오염 등으로 인한 배치 실패를 사전에 방지하여 손실을 최소화하고, 제품의 품질을 안정적으로 유지할 수 있습니다.
 
-## **4. Normalization.csv**
+### 3. 최종 품질 예측 및 공정 최적화 (회귀 및 강화학습)
 
-|**컬럼**|**의미**|
-|---|---|
-|Product code|제품 코드(하위군)|
-|Batch Size (tablets)|해당 하위군 목표 배치 크기(정제 수)|
-|Normalisation factor|배치 크기에 따라 계산된 정규화 계수 (예: Batch Size ÷ 100 000) — 파생 특성 값을 배치 크기로 보정할 때 사용|
+*   **문제 정의**: 공정 변수들을 어떻게 제어해야 페니실린 생산량을 극대화할 수 있는지 최적의 제어 정책을 찾습니다.
+*   **머신러닝 유형**: 회귀 (Regression) + 강화학습 (Reinforcement Learning)
+*   **접근 방식**:
+    1.  **디지털 트윈 (Digital Twin) 구축**: 먼저, 현재 공정 상태와 제어 변수(`Aeration rate`, `Sugar feed rate` 등)를 입력받아 다음 상태(예: 1시간 뒤의 `Penicillin concentration`, `Biomass concentration`)를 예측하는 시뮬레이션 모델을 만듭니다. (LSTM, GRU 모델 활용)
+    2.  **강화학습 에이전트 훈련**: 구축된 디지털 트윈 환경 내에서 강화학습 에이전트가 다양한 제어 정책을 시도하며 페니실린 생산량을 보상(reward)으로 받아 학습하게 합니다.
+*   **기대 효과**: 사람의 경험에만 의존하는 것이 아닌, 데이터 기반의 최적의 공정 운영 방법을 도출하여 생산 효율을 극대화할 수 있습니다.
